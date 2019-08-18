@@ -29,6 +29,12 @@
     <ClCompile Include="Oscillator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LFO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QBLimitedOscillator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plugin.h">
@@ -56,6 +62,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LFO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QBLimitedOscillator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

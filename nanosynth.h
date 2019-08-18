@@ -117,10 +117,16 @@ public:
 	// ADDED BY RACKAFX -- DO NOT EDIT THIS CODE!!! ----------------------------------- //
 	//  **--0x07FD--**
 
+	UINT m_uOscWaveform;
+	enum{SINE,SAW1,SAW2,SAW3,TRI,SQUARE,NOISE,PNOISE};
+	UINT m_uLFO1Waveform;
+	enum{sine,usaw,dsaw,square,expo,rsh,qrsh};
+	UINT m_uLFO1Mode;
+	enum{sync,shot,free};
+	double m_dLFO1Rate;
+	double m_dLFO1Amplitude;
 
 	// **--0x1A7F--**
 	// ------------------------------------------------------------------------------- //
 
 };
-
-

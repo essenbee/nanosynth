@@ -166,17 +166,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LFO.cpp" />
     <ClCompile Include="Oscillator.cpp" />
     <ClCompile Include="plugin.cpp" />
     <ClCompile Include="pluginobjects.cpp" />
+    <ClCompile Include="QBLimitedOscillator.cpp" />
     <ClCompile Include="RackAFXDLL.cpp" />
     <ClCompile Include="nanosynth.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LFO.h" />
     <ClInclude Include="lookuptables.h" />
     <ClInclude Include="Oscillator.h" />
     <ClInclude Include="plugin.h" />
     <ClInclude Include="pluginconstants.h" />
+    <ClInclude Include="QBLimitedOscillator.h" />
     <ClInclude Include="RackAFXDLL.h" />
     <ClInclude Include="nanosynth.h" />
     <ClInclude Include="synthfunctions.h" />
@@ -196,11 +200,3 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
-
-
-
-
-
-
-
