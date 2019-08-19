@@ -76,7 +76,7 @@ inline double CQBLimitedOscillator::doSawtooth(double dModulo, double dInc)
 inline double CQBLimitedOscillator::doSquare(double dModulo, double dInc)
 {
 	// Generate square wave using sum-of-sawthooth waves method
-	m_uWaveform == SAW1;
+	m_uWaveform = SAW1;
 	double dSaw1 = doSawtooth(dModulo, dInc);
 
 	// +ve frequencies
