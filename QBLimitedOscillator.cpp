@@ -52,9 +52,23 @@ inline double CQBLimitedOscillator::doSawtooth(double dModulo, double dInc)
 		dTrivialSawtooth = (tanh(1.5 * dTrivialSawtooth) / tanh(1.5));
 	}
 
-	// BLEP correction
-	dOut = dTrivialSawtooth + doBLEP_N(dBLEPTable, 4096, dModulo,
-		fabs(dInc), 1.0, false, 1, false);
+	// BLEP correction using pre-calculated lookup tables
+	if (m_dFo <= m_dSampleRate / 8.0)
+	{
+		// 4 sample points each side of discontinuity
+		// Only use at frequencies < a quarter of Nyquist frequency
+		dOut = dTrivialSawtooth + doBLEP_N(&dBLEPTable_8_BLKHAR[0], 4096, dModulo,
+			fabs(dInc), 1.0, false, 4, false);
+	}
+	else
+	{
+		// 1 sample point each side of discontinuity
+		dOut = dTrivialSawtooth + doBLEP_N(&dBLEPTable[0], 4096, dModulo,
+			fabs(dInc), 1.0, false, 1, true);
+	}
+
+	// Using PolyBLEP method instead
+	//dOut = dTrivialSawtooth + doPolyBLEP_2(dModulo, abs(dInc), 1.0, false);
 
 	return dOut;
 }
@@ -86,7 +100,7 @@ inline double CQBLimitedOscillator::doSquare(double dModulo, double dInc)
 	}
 
 	double dSaw2 = doSawtooth(dModulo, dInc);
-	double dOut = 0.5 * dSaw1 - 0.5 * dSaw2;
+	double dOut = 0.5 * dSaw1 - 0.5 * dSaw2; // Mix 180 degrees out of phase
 
 	double dCorr = 1.0 / (m_dPulseWidth / 100.0);
 
@@ -104,7 +118,19 @@ inline double CQBLimitedOscillator::doSquare(double dModulo, double dInc)
 inline double CQBLimitedOscillator::doTriangle(double dModulo, double dInc, double dFo, double dSquareModulator, double* pZ_register)
 {
 	double dOut = 0.0;
+	bool bDone = false;
 
+	double dBipolar = unipolarToBipolar(dModulo);
+	double dSq = dBipolar * dBipolar;
+	double dInv = 1.0 - dSq;
+	double dSqMod = dInv * dSquareModulator;
+
+	double dDifferentiatedSqMod = dSqMod - *pZ_register;
+	*pZ_register = dSqMod;
+
+	double c = m_dSampleRate / (4.0 * 2.0 * dFo * (1 - dInc));
+	dOut = dDifferentiatedSqMod * c;
+	
 	return dOut;
 }
 

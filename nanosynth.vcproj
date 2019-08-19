@@ -335,6 +335,10 @@
 				RelativePath="plugin.cpp"
 				>
 			</File>
+				<File RelativePath="QBLimitedOscillator.cpp"></File>
+
+				<File RelativePath="LFO.cpp"></File>
+
 				<File RelativePath="Oscillator.cpp"></File>
 
 			<File
@@ -358,6 +362,10 @@
 				RelativePath="plugin.h"
 				>
 			</File>
+				<File RelativePath="QBLimitedOscillator.h"></File>
+
+				<File RelativePath="LFO.h"></File>
+
 				<File RelativePath="trace.h"></File>
 
 				<File RelativePath="Oscillator.h"></File>
@@ -387,6 +395,12 @@
 	<Globals>
 	</Globals>
 </VisualStudioProject>
+
+
+
+
+
+
 
 
 
