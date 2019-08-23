@@ -13,30 +13,23 @@
 // base class
 #include "plugin.h"
 #include "synthfunctions.h"
-#include "LFO.h"
+
+// --- synth objects
 #include "QBLimitedOscillator.h"
+#include "LFO.h"
 
-
-// un-comment for advanced GUI API: see www.willpirkle.com for details and sample code
-/*
-#include "GUIViewAttributes.h"
-#include "../vstgui4/vstgui/vstgui.h"
-*/
-
-// un-comment for pure custom VSTGUI: see www.willpirkle.com for details and sample code
-//#include "VSTGUIController.h"
-
-class CNanosynth : public CPlugIn
+// abstract base class for RackAFX filters
+class CNanoSynth : public CPlugIn
 {
 public:
 	// RackAFX Plug-In API Member Methods:
 	// The followung 5 methods must be impelemented for a meaningful Plug-In
 	//
 	// 1. One Time Initialization
-	CNanosynth();
+	CNanoSynth();
 
 	// 2. One Time Destruction
-	virtual ~CNanosynth(void);
+	virtual ~CNanoSynth(void);
 
 	// 3. The Prepare For Play Function is called just before audio streams
 	virtual bool __stdcall prepareForPlay();
@@ -46,6 +39,7 @@ public:
 
 	// 5. userInterfaceChange() occurs when the user moves a control.
 	virtual bool __stdcall userInterfaceChange(int nControlIndex);
+
 
 	// OPTIONAL ADVANCED METHODS ------------------------------------------------------------------------------------------------
 	// These are more advanced; see the website for more details
@@ -91,35 +85,15 @@ public:
 	// 16. initUI() is called only once from the constructor; you do not need to write or call it. Do NOT modify this function
 	virtual bool __stdcall initUI();
 
-	// 17. Custom GUI and Advanced GUI API support
-	virtual void* __stdcall showGUI(void* pInfo);
 
-	// 18. process aux inputs (for sidechain capability; optional, not used in FX book projects)
-	virtual bool __stdcall processAuxInputBus(audioProcessData* pAudioProcessData);
-
-	// 19. thread-safe implementation for updating GUI controls from plugin
-	virtual bool __stdcall checkUpdateGUI(int nControlIndex, float fValue, CLinkedList<GUI_PARAMETER>& guiParameters, bool bLoadingPreset);
-
-	// --- override for sample accurate MIDI support
-	virtual void __stdcall processRackAFXMessage(UINT uMessage, PROCESS_INFO& processInfo);
-
-	// --- function to handle VST sample accurate parameter updates
-	void doVSTSampleAccurateParamUpdates();
-
-	// --- declare an EventList interface
-	IMidiEventList* m_pMidiEventList;
 
 	// Add your code here: ----------------------------------------------------------- //
 
-	UINT m_uMidiRxChannel;
-
 	CQBLimitedOscillator m_Osc1;
 	CQBLimitedOscillator m_Osc2;
-
 	CLFO m_LFO1;
-
 	void update();
-
+	UINT m_uMidiRxChannel;
 	// END OF USER CODE -------------------------------------------------------------- //
 
 

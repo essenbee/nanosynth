@@ -62,7 +62,7 @@ extern "C"
 //RackAFX Creation Function
 DllExport CPlugIn* createObject()
 {
-	CPlugIn* pOb = new CNanosynth(); // ***
+	CPlugIn* pOb = new CNanoSynth(); // ***
 	return pOb;
 }
 

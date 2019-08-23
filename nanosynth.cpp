@@ -6,11 +6,9 @@
 
 
 #include <vector>
-#include "nanosynth.h"
+#include "NanoSynth.h"
 #include "trace.h"
-
-// #define LOG_MIDI 0
-
+//#define LOG_MIDI 1
 
 /* constructor()
 	You can initialize variables here.
@@ -18,7 +16,7 @@
 	require the plugin to be fully instantiated. If so, allocate in init()
 
 */
-CNanosynth::CNanosynth()
+CNanoSynth::CNanoSynth()
 {
 	// Added by RackAFX - DO NOT REMOVE
 	//
@@ -27,7 +25,7 @@ CNanosynth::CNanosynth()
 	// END initUI()
 
 	// built in initialization
-	m_PlugInName = "nanosynth";
+	m_PlugInName = "NanoSynth";
 
 	// Default to Stereo Operation:
 	// Change this if you want to support more/less channels
@@ -37,29 +35,35 @@ CNanosynth::CNanosynth()
 	// use of MIDI controllers to adjust sliders/knobs
 	m_bEnableMIDIControl = true;		// by default this is enabled
 
+	// custom GUI stuff
+	m_bLinkGUIRowsAndButtons = false;	// change this if you want to force-link
+
 	// DO NOT CHANGE let RackAFX change it for you; use Edit Project to alter
 	m_bUseCustomVSTGUI = false;
 
+	// for a user (not RackAFX) generated GUI - advanced you must compile your own resources
+	// DO NOT CHANGE let RackAFX change it for you; use Edit Project to alter
+	m_bUserCustomGUI = false;
+
 	// output only - SYNTH - plugin DO NOT CHANGE let RackAFX change it for you; use Edit Project to alter
 	m_bOutputOnlyPlugIn = true;
-
-	// change to true if you want all MIDI messages
-	m_bWantAllMIDIMessages = false;
 
 	// un-comment this for VST/AU Buffer-style processing
 	// m_bWantVSTBuffers = true;
 
 	// Finish initializations here
-	m_pMidiEventList = NULL; // --- for sample accurate MIDI in VST, AU (AAX has its own method)
-	m_uMidiRxChannel = MIDI_CH_ALL;
 	m_bWantAllMIDIMessages = true;
+
+	// receive on all channels
+	m_uMidiRxChannel = MIDI_CH_ALL;
 }
 
 
 /* destructor()
-	Destroy dynamically allocated variables
+	Destroy variables allocated in the contructor()
+
 */
-CNanosynth::~CNanosynth(void)
+CNanoSynth::~CNanoSynth(void)
 {
 
 
@@ -68,35 +72,18 @@ CNanosynth::~CNanosynth(void)
 /*
 initialize()
 	Called by the client after creation; the parent window handle is now valid
-	so you can use the Plug-In -> Host functions here
+	so you can use the Plug-In -> Host functions here (eg sendUpdateUI())
 	See the website www.willpirkle.com for more details
 */
-bool __stdcall CNanosynth::initialize()
+bool __stdcall CNanoSynth::initialize()
 {
 	// Add your code here
+
 
 	return true;
 }
 
-/*
-processRackAFXMessage()
-	Called for a variety of reasons, but we override here to pick up a MIDIEventList interface
-	for sample accurate MIDI in VST/AU NOTE: this is only for use in processVSTBuffer()
-	If you use processAudioFrame( ) you do not need to bother with this as you already
-	have sample accurate MIDI in v6.8.0.5 and above
-	See the website www.willpirkle.com for more details
-*/
-void __stdcall CNanosynth::processRackAFXMessage(UINT uMessage, PROCESS_INFO& processInfo)
-{
-	// --- always call base class first
-	CPlugIn::processRackAFXMessage(uMessage, processInfo);
 
-	// --- for MIDI Event list handling (AU, VST, AAX with processVSTBuffer())
-	if (uMessage == midiEventList)
-	{
-		m_pMidiEventList = processInfo.pIMidiEventList;
-	}
-}
 
 /* prepareForPlay()
 	Called by the client after Play() is initiated but before audio streams
@@ -112,28 +99,22 @@ void __stdcall CNanosynth::processRackAFXMessage(UINT uMessage, PROCESS_INFO& pr
 		  processAudioFrame() because the user might change to another wave file,
 		  or use the sound card, oscillators, or impulse response mechanisms
 
-	NOTE: if you alloctae memory in this function, destroy it in the destructor above
+	NOTE: if you allocte memory in this function, destroy it in ::destroy() above
 */
-bool __stdcall CNanosynth::prepareForPlay()
+bool __stdcall CNanoSynth::prepareForPlay()
 {
-	// Add your code here:
-	m_Osc1.setSampleRate(m_nSampleRate);
-	m_Osc2.setSampleRate(m_nSampleRate);
-	m_LFO1.setSampleRate(m_nSampleRate);
+	m_Osc1.setSampleRate((double)m_nSampleRate);
+	m_Osc2.setSampleRate((double)m_nSampleRate);
+	m_LFO1.setSampleRate((double)m_nSampleRate);
 
-	m_Osc2.m_nCents = 2.5; // Detune oscillator 2 by 2.5 cents for sonic reasons
+	m_Osc2.m_nCents = 2.5;
 
-	//Update from GUI
 	update();
 
 	return true;
-	// --- let base class do its thing
-	//return CPlugIn::prepareForPlay();
 }
 
-// User-provided update() method to
-// update the C++ objects from the GUI controls
-void CNanosynth::update()
+void CNanoSynth::update()
 {
 	m_Osc1.m_uWaveform = m_uOscWaveform;
 	m_Osc2.m_uWaveform = m_uOscWaveform;
@@ -154,37 +135,25 @@ void CNanosynth::update()
 LEFT INPUT = pInputBuffer[0];
 RIGHT INPUT = pInputBuffer[1]
 
-LEFT OUTPUT = pOutputBuffer[0]
-RIGHT OUTPUT = pOutputBuffer[1]
+LEFT INPUT = pInputBuffer[0]
+LEFT OUTPUT = pOutputBuffer[1]
 
-HOST INFORMATION is available in m_HostProcessInfo:
-
-// --- for RackAFX and all derivative projects:
-m_HostProcessInfo.uAbsoluteSampleBufferIndex = sample index of top of current audio buffer
-m_HostProcessInfo.dAbsoluteSampleBufferTime = time (sec) of sample in top of current audio buffer
-m_HostProcessInfo.dBPM = Host Tempo setting in BPM
-m_HostProcessInfo.fTimeSigNumerator = Host Time Signature Numerator (if supported by host)
-m_HostProcessInfo.uTimeSigDenomintor = Host Time Signature Denominator (if supported by host)
-
-// --- see the definition of HOST_INFO in the pluginconstants.h file for variables that are
-//     unique to AU, AAX and VST for use in your ported projects!
 */
-bool __stdcall CNanosynth::processAudioFrame(float* pInputBuffer, float* pOutputBuffer, UINT uNumInputChannels, UINT uNumOutputChannels)
+bool __stdcall CNanoSynth::processAudioFrame(float* pInputBuffer, float* pOutputBuffer, UINT uNumInputChannels, UINT uNumOutputChannels)
 {
+	// output = input -- change this for meaningful processing
+	//
 	double dOut = 0.0;
-
-	if (m_Osc1.m_bNoteOn)
+	if(m_Osc1.m_bNoteOn)
 	{
-		// Get LFO Output
 		double dLFO1Out = m_LFO1.doOscillate();
-
-		m_Osc1.setFoModExp(dLFO1Out * OSC_FO_MOD_RANGE);
-		m_Osc2.setFoModExp(dLFO1Out * OSC_FO_MOD_RANGE);
+		m_Osc1.setFoModExp(dLFO1Out*OSC_FO_MOD_RANGE);
+		m_Osc2.setFoModExp(dLFO1Out*OSC_FO_MOD_RANGE);
 
 		m_Osc1.update();
 		m_Osc2.update();
 
-		dOut = 0.5 * m_Osc1.doOscillate() + 0.5 * m_Osc2.doOscillate();
+		dOut = 0.5*m_Osc1.doOscillate() + 0.5*m_Osc2.doOscillate();
 	}
 
 	pOutputBuffer[0] = dOut;
@@ -193,7 +162,6 @@ bool __stdcall CNanosynth::processAudioFrame(float* pInputBuffer, float* pOutput
 	if (uNumInputChannels == 1 && uNumOutputChannels == 2)
 	{
 		pOutputBuffer[1] = dOut;
-
 	}
 
 	// Stereo-In, Stereo-Out (INSERT Effect)
@@ -237,74 +205,27 @@ UIList Index	Variable Name					Control Index
 // ------------------------------------------------------------------------------- */
 // Add your UI Handler code here ------------------------------------------------- //
 //
-bool __stdcall CNanosynth::userInterfaceChange(int nControlIndex)
+bool __stdcall CNanoSynth::userInterfaceChange(int nControlIndex)
 {
 	update();
+	//
+	// OR
+	//
+	// decode the control index, or delete the switch and use brute force calls
+	switch(nControlIndex)
+	{
+		case 0:
+		{
+			break;
+		}
+
+		default:
+			break;
+	}
 
 	return true;
 }
 
-// --- message for updating GUI from plugin; see the comment block above userInterfaceChange( ) for
-//     the index values to use when sending outbound parameter changes
-//     see www.willpirkle.com for information on using this function to update the GUI from your plugin
-//     The bLoadingPreset flag will be set if this is being called as a result of a preset load; you may
-//     want to ignore GUI updates for presets depending on how your update works!
-//     NOTE: this function will be called even if no audio is flowing (unlike userInterfaceChange( ) which
-//           will only get called while in the audio processing loop (see Thread Safety document on website)
-bool __stdcall CNanosynth::checkUpdateGUI(int nControlIndex, float fValue, CLinkedList<GUI_PARAMETER>& guiParameters, bool bLoadingPreset)
-{
-	// decode the control index
-	switch (nControlIndex)
-	{
-	case 0:
-	{
-		// return true; // if update needed
-		// break;		// if no update needed
-	}
-
-	default:
-		break;
-	}
-	return false;
-}
-
-// --- process aux inputs
-//     This function will be called once for each Aux Input bus, currently:
-//
-//     Aux Input 1: Sidechain
-//     May add more input busses in the future
-//
-//     see www.willpirkle.com for info on using the Aux input bus
-bool __stdcall CNanosynth::processAuxInputBus(audioProcessData* pAudioProcessData)
-{
-	/* --- pick up pointers to the Aux Input busses for sidechain or other Aux processing
-
-			Ordinarily, you just copy the buffer pointers to member variables and then
-			use the pointers in your process( ) function.
-
-			However, you also have the option of pre-processing the Aux inputs in-place
-			in these buffers, though no idea when you might need that...
-
-	Example:
-	if(pAudioProcessData->uInputBus == 1)
-	{
-		// --- save varius pointers, in practice you only save the
-		//     pointer you need for your particular process( ) function
-		//     Note these are member variables you need to declare on your own in the .h file!
-		//
-		m_pSidechainFrameBuffer = pAudioProcessData->pFrameInputBuffer; // <-- for processAudioFrame( )
-		m_pSidechainRAFXBuffer = pAudioProcessData->pRAFXInputBuffer;	// <-- for processRackAFXAudioBuffer
-		m_ppSidechainVSTBuffer = pAudioProcessData->ppVSTInputBuffer;	// <-- for processVSTAudioBuffer
-
-		// --- sidechain input activation/channels
-		m_bSidechainEnabled = pAudioProcessData->bInputEnabled;
-		m_uSidechainChannelCount = pAudioProcessData->uNumInputChannels;
-	}
-
-	*/
-
-	return true;
-}
 
 /* joystickControlChange
 
@@ -326,7 +247,7 @@ bool __stdcall CNanosynth::processAuxInputBus(audioProcessData* pAudioProcessDat
 	AC Mix = projection on X Axis (0 -> 1)
 	BD Mix = projection on Y Axis (0 -> 1)
 */
-bool __stdcall CNanosynth::joystickControlChange(float fControlA, float fControlB, float fControlC, float fControlD, float fACMix, float fBDMix)
+bool __stdcall CNanoSynth::joystickControlChange(float fControlA, float fControlB, float fControlC, float fControlD, float fACMix, float fBDMix)
 {
 	// add your code here
 
@@ -351,29 +272,23 @@ bool __stdcall CNanosynth::joystickControlChange(float fControlA, float fControl
 	******************************
 	********* IMPORTANT! *********
 	******************************
-	If you are going to ultimately use <Make VST> or <Make AU> to port your project and you want to process
-	buffers instead of frames, you need to override processVSTAudioBuffer() below instead;
+	If you are going to ultimately make this a VST Compatible Plug-In and you want to process
+	buffers, you need to override the NEXT function below:
 
-	processRackAFXAudioBuffer() is NOT supported in <Make VST>, <Make AU>, and <Make AAX>
+	processVSTAudioBuffer()
 
-	HOST INFORMATION is available in m_HostProcessInfo:
 
-	m_HostProcessInfo.uAbsoluteSampleBufferIndex = sample index of top of current audio buffer
-	m_HostProcessInfo.dAbsoluteSampleBufferTime = time (sec) of sample in top of current audio buffer
-	m_HostProcessInfo.dBPM = Host Tempo setting in BPM
-	m_HostProcessInfo.fTimeSigNumerator = Host Time Signature Numerator (if supported by host)
-	m_HostProcessInfo.uTimeSigDenomintor = Host Time Signature Denominator (if supported by host)
+	This function (processRackAFXAudioBuffer) is not supported in the VST wrapper because
+	the VST buffer sizes no maximum value. This would require the use of dynamic buffering
+	in the callback which is not acceptable for performance!
 */
-bool __stdcall CNanosynth::processRackAFXAudioBuffer(float* pInputBuffer, float* pOutputBuffer,
-	UINT uNumInputChannels, UINT uNumOutputChannels,
-	UINT uBufferSize)
+bool __stdcall CNanoSynth::processRackAFXAudioBuffer(float* pInputBuffer, float* pOutputBuffer,
+													   UINT uNumInputChannels, UINT uNumOutputChannels,
+													   UINT uBufferSize)
 {
 
-	for (UINT i = 0; i < uBufferSize; i++)
+	for(UINT i=0; i<uBufferSize; i++)
 	{
-		// smooth parameters (if enabled) DO NOT REMOVE
-		smoothParameterValues(); // done on a per-sample-interval basis
-
 		// pass through code
 		pOutputBuffer[i] = pInputBuffer[i];
 	}
@@ -405,66 +320,52 @@ bool __stdcall CNanosynth::processRackAFXAudioBuffer(float* pInputBuffer, float*
 	For 5.1 audio you would get 6 pointers in each buffer.
 
 */
-bool __stdcall CNanosynth::processVSTAudioBuffer(float** inBuffer, float** outBuffer, UINT uNumChannels, int inFramesToProcess)
+bool __stdcall CNanoSynth::processVSTAudioBuffer(float** inBuffer, float** outBuffer, UINT uNumChannels, int inFramesToProcess)
 {
 	// PASS Through example
 	// MONO First
-	float* pInputL = inBuffer[0];
+	float* pInputL  = inBuffer[0];
 	float* pOutputL = outBuffer[0];
-	float* pInputR = NULL;
+	float* pInputR  = NULL;
 	float* pOutputR = NULL;
 
 	// if STEREO,
-	if (inBuffer[1])
+	if(inBuffer[1])
 		pInputR = inBuffer[1];
 
-	if (outBuffer[1])
+	if(outBuffer[1])
 		pOutputR = outBuffer[1];
 
 	// Process audio by de-referencing ptrs
 	// this is siple pass through code
-	unsigned int uSample = 0;
 	while (--inFramesToProcess >= 0)
 	{
-		// --- fire midi events (AU, VST2, AAX buffer processing only; not needed if you use processAudioFrame())
-		if (m_pMidiEventList)
-			m_pMidiEventList->fireMidiEvent(uSample++);
-
-		// --- sample accurate automation for VST3 only
-		doVSTSampleAccurateParamUpdates();
-
-		// --- smooth parameters (if enabled) DO NOT REMOVE
-		smoothParameterValues(); // done on a per-sample-interval basis
-
-		// --- Left channel processing
+		// Left channel processing
 		*pOutputL = *pInputL;
 
-		// --- If there is a right channel
-		if (pInputR && pOutputR)
-			* pOutputR = *pInputR;
-		else if (pOutputR) // 1->2 mapping
-			* pOutputR = *pOutputL;
+		// If there is a right channel
+		if(pInputR)
+			*pOutputR = *pInputR;
 
-		// --- advance pointers
+		// advance pointers
 		pInputL++;
 		pOutputL++;
-		if (pInputR) pInputR++;
-		if (pOutputR) pOutputR++;
+		if(pInputR) pInputR++;
+		if(pOutputR) pOutputR++;
 	}
-	// --- all OK
+	// all OK
 	return true;
 }
 
-bool __stdcall CNanosynth::midiNoteOn(UINT uChannel, UINT uMIDINote, UINT uVelocity)
+bool __stdcall CNanoSynth::midiNoteOn(UINT uChannel, UINT uMIDINote, UINT uVelocity)
 {
-	if (m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
-	{
+	// test channel/ignore
+	if(m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
 		return false;
-	}
 
-#ifdef LOG_MIDI
-	TRACE("-- Note On Ch: %d Note: %d Vel: %d \n", uChannel, uMIDINote, uVelocity);
-#endif
+	#ifdef LOG_MIDI
+		TRACE("-- Note On Ch:%d Note:%d Vel:%d \n", uChannel, uMIDINote, uVelocity);
+	#endif
 
 	m_Osc1.m_dOscFo = midiFreqTable[uMIDINote];
 	m_Osc2.m_dOscFo = midiFreqTable[uMIDINote];
@@ -475,25 +376,21 @@ bool __stdcall CNanosynth::midiNoteOn(UINT uChannel, UINT uMIDINote, UINT uVeloc
 	m_Osc2.startOscillator();
 	m_LFO1.startOscillator();
 
+
 	return true;
 }
 
-bool __stdcall CNanosynth::midiNoteOff(UINT uChannel, UINT uMIDINote, UINT uVelocity, bool bAllNotesOff)
+bool __stdcall CNanoSynth::midiNoteOff(UINT uChannel, UINT uMIDINote, UINT uVelocity, bool bAllNotesOff)
 {
-	if (m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
-	{
+	// test channel/ignore
+	if(m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
 		return false;
-	}
 
 #ifdef LOG_MIDI
-	if (bAllNotesOff)
-	{
-		TRACE("-- All Notes Off \n");
-	}
-	else
-	{
-		TRACE("-- Note Off Ch: %d Note: %d Vel: %d \n", uChannel, uMIDINote, uVelocity);
-	}
+		if(bAllNotesOff)
+			TRACE("-- All Notes OFF Ch:%d \n", uChannel);
+		else
+			TRACE("-- Note Off Ch:%d Note:%d Vel:%d \n", uChannel, uMIDINote, uVelocity);
 #endif
 
 	m_Osc1.stopOscillator();
@@ -504,32 +401,31 @@ bool __stdcall CNanosynth::midiNoteOff(UINT uChannel, UINT uMIDINote, UINT uVelo
 }
 
 // uModValue = 0->127
-bool __stdcall CNanosynth::midiModWheel(UINT uChannel, UINT uModValue)
+bool __stdcall CNanoSynth::midiModWheel(UINT uChannel, UINT uModValue)
 {
-	if (m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
-	{
+	// test channel/ignore
+	if(m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
 		return false;
-	}
 
-#ifdef LOG_MIDI
-	TRACE("-- Mod Wheel Ch: %d Value: %d \n", uChannel, uModValue);
-#endif
+	#ifdef LOG_MIDI
+		TRACE("-- Mod Wheel Ch:%d Value:%d \n", uChannel, uModValue);
+	#endif
 
 	return true;
 }
 
 // nActualPitchBendValue 		= -8192 -> +8191, 0 at center
 // fNormalizedPitchBendValue 	= -1.0  -> +1.0,  0 at center
-bool __stdcall CNanosynth::midiPitchBend(UINT uChannel, int nActualPitchBendValue, float fNormalizedPitchBendValue)
+bool __stdcall CNanoSynth::midiPitchBend(UINT uChannel, int nActualPitchBendValue, float fNormalizedPitchBendValue)
 {
-	if (m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
-	{
+	// test channel/ignore
+	if(m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
 		return false;
-	}
 
-#ifdef LOG_MIDI
-	TRACE("-- Pitch Bend Ch: %d Actual Value: %d Norm. Value: %f \n", uChannel, nActualPitchBendValue, fNormalizedPitchBendValue);
-#endif
+	#ifdef LOG_MIDI
+		TRACE("-- Pitch Bend Ch:%d int:%d float:%f \n", uChannel, nActualPitchBendValue, fNormalizedPitchBendValue);
+	#endif
+
 	return true;
 }
 
@@ -546,212 +442,129 @@ bool __stdcall CNanosynth::midiPitchBend(UINT uChannel, int nActualPitchBendValu
    in each quarter note. Therefore, there should be 24 * 120 MIDI Clocks per minute.
    So, each MIDI Clock is sent at a rate of 60,000,000/(24 * 120) microseconds).
 */
-bool __stdcall CNanosynth::midiClock()
+bool __stdcall CNanoSynth::midiClock()
 {
 
 	return true;
 }
 
 // any midi message other than note on, note off, pitchbend, mod wheel or clock
-bool __stdcall CNanosynth::midiMessage(unsigned char cChannel, unsigned char cStatus, unsigned char
-	cData1, unsigned char cData2)
+bool __stdcall CNanoSynth::midiMessage(unsigned char cChannel, unsigned char cStatus, unsigned char
+										  cData1, unsigned char cData2)
 {
-	auto uChannel = static_cast<UINT>(cChannel);
-	auto uData1 = static_cast<UINT>(cData1);
-	auto uData2 = static_cast<UINT>(cData2);
-
-	if (m_uMidiRxChannel != MIDI_CH_ALL && uChannel != m_uMidiRxChannel)
-	{
+	// test channel/ignore
+	if(m_uMidiRxChannel != MIDI_CH_ALL && (UINT)cChannel != m_uMidiRxChannel)
 		return false;
-	}
 
-	switch (cStatus)
+	switch(cStatus)
 	{
-	case POLY_PRESSURE:
-	{
-#ifdef LOG_MIDI
-		TRACE("-- Poly Pressure Ch: %d Note: %d Value: %d \n", uChannel, uData1, uData2);
-#endif
-		break;
-	}
-	case CONTROL_CHANGE:
-	{
-		switch (cData1)
+		case POLY_PRESSURE:
 		{
-		case VOLUME_CC07:
-		{
-#ifdef LOG_MIDI
-			TRACE("-- Volume Ch: %d Value: %d \n", uChannel, uData2);
-#endif
+			#ifdef LOG_MIDI
+				TRACE("-- Poly Pressure Ch:%d Note:%d Value:%d \n", (UINT)cChannel, (UINT)cData1, (UINT)cData2);
+			#endif
+
 			break;
 		}
-		case PAN_CC10:
+		case CONTROL_CHANGE:
 		{
-#ifdef LOG_MIDI
-			TRACE("-- Pan Ch: %d Value: %d \n", uChannel, uData2);
-#endif
-			break;
-		}
-		case EXPRESSION_CC11:
-		{
-#ifdef LOG_MIDI
-			TRACE("-- Expression Pedal Ch: %d Value: %d \n", uChannel, uData2);
-#endif
-			break;
-		}
-		case SUSTAIN_PEDAL:
-		{
-			auto sustainOn = uData2 > 63;
-#ifdef LOG_MIDI
-			if (sustainOn)
+			switch(cData1)
 			{
-				TRACE("-- Sustain Pedal ON Ch: %d \n", uChannel);
+				case VOLUME_CC07:
+				{
+					#ifdef LOG_MIDI
+						TRACE("-- Volume Ch:%d Value:%d \n", (UINT)cChannel, (UINT)cData2);
+					#endif
+
+					break;
+				}
+				case PAN_CC10:
+				{
+					#ifdef LOG_MIDI
+						TRACE("-- Pan Ch:%d Value:%d \n", (UINT)cChannel, (UINT)cData2);
+					#endif
+
+					break;
+				}
+				case EXPRESSION_CC11:
+				{
+					#ifdef LOG_MIDI
+						TRACE("-- Expression Ch:%d Value:%d \n", (UINT)cChannel, (UINT)cData2);
+					#endif
+
+					break;
+				}
+				case SUSTAIN_PEDAL:
+				{
+					// --- 64 or greater = ON for all switch messages
+					bool sus = (UINT)cData2 > 63 ? true : false;
+
+					#ifdef LOG_MIDI
+						if(sus)
+							TRACE("-- Sustain Pedal ON");
+						else
+							TRACE("-- Sustain Pedal OFF");
+					#endif
+					break;
+				}
+				case ALL_NOTES_OFF:
+				{
+					// handled in midiNoteOff() for RackAFX
+					break;
+				}
+				case MOD_WHEEL:
+				{
+					// handled separately
+					break;
+				}
+				// --- all other controllers
+				default:
+				{
+					#ifdef LOG_MIDI
+					if((UINT)cData1 != RESET_ALL_CONTROLLERS) // ignore these
+						TRACE("-- CC Ch:%d Num:%d Value:%d \n", (UINT)cChannel, (UINT)cData1, (UINT)cData2);
+					#endif
+
+					break;
+				}
 			}
-			else
-			{
-				TRACE("-- Sustain Pedal OFF Ch: %d \n", uChannel);
-			}
-#endif
+
 			break;
 		}
-		case ALL_NOTES_OFF:
+
+		case PROGRAM_CHANGE:
 		{
+			#ifdef LOG_MIDI
+				TRACE("-- Program Change Num Ch:%d Value:%d \n", (UINT)cChannel, (UINT)cData1);
+			#endif
+
 			break;
 		}
-		case MOD_WHEEL:
+		case CHANNEL_PRESSURE:
 		{
+			#ifdef LOG_MIDI
+				TRACE("-- Channel Pressure Value Ch:%d Value:%d \n", (UINT)cChannel, (UINT)cData1);
+			#endif
+
 			break;
 		}
+
 		default:
-		{
-#ifdef LOG_MIDI
-			if (uData1 != RESET_ALL_CONTROLLERS)
-			{
-				TRACE("-- Control Ch: %d Num: %dValue: %d \n", uChannel, uData1, uData2);
-			}
-#endif
 			break;
-		}
-		}
-	case PROGRAM_CHANGE:
-	{
-#ifdef LOG_MIDI
-		TRACE("-- Program Change Ch: %d Num: %d Value: %d \n", uChannel, uData1, uData2);
-#endif
-		break;
-	}
-	case CHANNEL_PRESSURE:
-	{
-#ifdef LOG_MIDI
-		TRACE("-- Program Change Ch: %d Num: %d \n", uChannel, uData1);
-#endif
-		break;
-	}
-	default:
-	{
-		break;
-	}
-
-	}
 	}
 
 	return true;
 }
 
-/* doVSTSampleAccurateParamUpdates
-	Short handler for VST3 sample accurate automation added in v6.8.0.5
-	There is nothing for you to modify here.
-*/
-void CNanosynth::doVSTSampleAccurateParamUpdates()
+
+// DO NOT DELETE THIS FUNCTION --------------------------------------------------- //
+bool __stdcall CNanoSynth::initUI()
 {
-	// --- for sample accurate parameter automation in VST3 plugins; ignore otherwise
-	if (!m_ppControlTable) return; /// should NEVER happen
-	for (int i = 0; i < m_uControlListCount; i++)
-	{
-		if (m_ppControlTable[i] && m_ppControlTable[i]->pvAddlData)
-		{
-			double dValue = 0;
-			if (((IParamUpdateQueue*)m_ppControlTable[i]->pvAddlData)->getNextValue(dValue))
-			{
-				setNormalizedParameter(m_ppControlTable[i], dValue, true);
-			}
-		}
-	}
-}
-
-// --- showGUI()
-//     This is the main interface function for all GUIs, including custom GUIs
-//     It is also where you deal with Custom Controls (see Advanced GUI API)
-void* __stdcall CNanosynth::showGUI(void* pInfo)
-{
-	// --- ALWAYS try base class first in case of future updates
-	void* result = CPlugIn::showGUI(pInfo);
-	if (result)
-		return result;
-
-	/* Uncomment if using advanced GUI API: see www.willpirkle.com for details and sample code
-	// --- uncloak the info struct
-	VSTGUI_VIEW_INFO* info = (VSTGUI_VIEW_INFO*)pInfo;
-	if(!info) return NULL;
-
-	switch(info->message)
-	{
-		case GUI_DID_OPEN:
-		{
-			return NULL;
-		}
-		case GUI_WILL_CLOSE:
-		{
-			return NULL;
-		}
-		case GUI_CUSTOMVIEW:
-		{
-			// --- create custom view, return a CView* cloaked as void* or NULL if not supported
-			return NULL;
-		}
-
-		case GUI_HAS_USER_CUSTOM:
-		{
-			// --- set this variable to true if you have a custom GUI
-			info->bHasUserCustomView = false;
-			return NULL;
-		}
-
-		// --- create your custom VSTGUI4 object using the CVSTGUIController (supplied),
-		//     a subclass of the CVSTGUIController that you supply, a VSTGUI4 object
-		//     that is derived at least from: VSTGUIEditorInterface, CControlListener, CBaseObject
-		//     see VSTGUIController.h for an example
-		//
-		//     open() sets the new size of the window in info->size
-		//     return a pointer to the newly created object
-		case GUI_USER_CUSTOM_OPEN:
-		{
-			return NULL;
-		}
-		// --- call the close() function and delete the controller object
-		case GUI_USER_CUSTOM_CLOSE:
-		{
-			return NULL;
-		}
-		// --- handle paint-specific timer stuff
-		case GUI_TIMER_PING:
-		{
-
-			return NULL;
-		}
-	} */
-
-	return NULL;
-}
-
-// --- DO NOT EDIT OR DELETE THIS FUNCTION ----------------------------------------------- //
-bool __stdcall CNanosynth::initUI()
-{
-	// ADDED BY RACKAFX -- DO NOT EDIT THIS CODE!!! -------------------------------------- //
-	if (m_UIControlList.count() > 0)
+	// ADDED BY RACKAFX -- DO NOT EDIT THIS CODE!!! ------------------------------ //
+	if(m_UIControlList.count() > 0)
 		return true;
 
-	// **--0xDEA7--**
+// **--0xDEA7--**
 
 	std::vector<CUICtrl*> uiCtrls;
 
@@ -776,7 +589,7 @@ bool __stdcall CNanosynth::initUI()
 	ui0->cControlUnits = "Units";
 	ui0->cVariableName = "m_uOscWaveform";
 	ui0->cEnumeratedList = "SINE,SAW1,SAW2,SAW3,TRI,SQUARE,NOISE,PNOISE";
-	ui0->dPresetData[0] = 0.000000;ui0->dPresetData[1] = 0.000000;ui0->dPresetData[2] = 0.000000;ui0->dPresetData[3] = 0.000000;ui0->dPresetData[4] = 0.000000;ui0->dPresetData[5] = 0.000000;ui0->dPresetData[6] = 0.000000;ui0->dPresetData[7] = 0.000000;ui0->dPresetData[8] = 0.000000;ui0->dPresetData[9] = 0.000000;ui0->dPresetData[10] = 0.000000;ui0->dPresetData[11] = 0.000000;ui0->dPresetData[12] = 0.000000;ui0->dPresetData[13] = 0.000000;ui0->dPresetData[14] = 0.000000;ui0->dPresetData[15] = 0.000000;
+	ui0->dPresetData[0] = -0.000000;ui0->dPresetData[1] = 0.000000;ui0->dPresetData[2] = 0.000000;ui0->dPresetData[3] = 0.000000;ui0->dPresetData[4] = 0.000000;ui0->dPresetData[5] = 0.000000;ui0->dPresetData[6] = 0.000000;ui0->dPresetData[7] = 0.000000;ui0->dPresetData[8] = 0.000000;ui0->dPresetData[9] = 0.000000;ui0->dPresetData[10] = 0.000000;ui0->dPresetData[11] = 0.000000;ui0->dPresetData[12] = 0.000000;ui0->dPresetData[13] = 0.000000;ui0->dPresetData[14] = 0.000000;ui0->dPresetData[15] = 0.000000;
 	ui0->cControlName = "Osc Waveform";
 	ui0->bOwnerControl = false;
 	ui0->bMIDIControl = false;
@@ -813,7 +626,7 @@ bool __stdcall CNanosynth::initUI()
 	ui1->cControlUnits = "Units";
 	ui1->cVariableName = "m_uLFO1Waveform";
 	ui1->cEnumeratedList = "sine,usaw,dsaw,square,expo,rsh,qrsh";
-	ui1->dPresetData[0] = 0.000000;ui1->dPresetData[1] = 0.000000;ui1->dPresetData[2] = 0.000000;ui1->dPresetData[3] = 0.000000;ui1->dPresetData[4] = 0.000000;ui1->dPresetData[5] = 0.000000;ui1->dPresetData[6] = 0.000000;ui1->dPresetData[7] = 0.000000;ui1->dPresetData[8] = 0.000000;ui1->dPresetData[9] = 0.000000;ui1->dPresetData[10] = 0.000000;ui1->dPresetData[11] = 0.000000;ui1->dPresetData[12] = 0.000000;ui1->dPresetData[13] = 0.000000;ui1->dPresetData[14] = 0.000000;ui1->dPresetData[15] = 0.000000;
+	ui1->dPresetData[0] = -0.000000;ui1->dPresetData[1] = 0.000000;ui1->dPresetData[2] = 0.000000;ui1->dPresetData[3] = 0.000000;ui1->dPresetData[4] = 0.000000;ui1->dPresetData[5] = 0.000000;ui1->dPresetData[6] = 0.000000;ui1->dPresetData[7] = 0.000000;ui1->dPresetData[8] = 0.000000;ui1->dPresetData[9] = 0.000000;ui1->dPresetData[10] = 0.000000;ui1->dPresetData[11] = 0.000000;ui1->dPresetData[12] = 0.000000;ui1->dPresetData[13] = 0.000000;ui1->dPresetData[14] = 0.000000;ui1->dPresetData[15] = 0.000000;
 	ui1->cControlName = "LFO 1 Waveform";
 	ui1->bOwnerControl = false;
 	ui1->bMIDIControl = false;
@@ -850,7 +663,7 @@ bool __stdcall CNanosynth::initUI()
 	ui2->cControlUnits = "Units";
 	ui2->cVariableName = "m_uLFO1Mode";
 	ui2->cEnumeratedList = "sync,shot,free";
-	ui2->dPresetData[0] = 0.000000;ui2->dPresetData[1] = 0.000000;ui2->dPresetData[2] = 0.000000;ui2->dPresetData[3] = 0.000000;ui2->dPresetData[4] = 0.000000;ui2->dPresetData[5] = 0.000000;ui2->dPresetData[6] = 0.000000;ui2->dPresetData[7] = 0.000000;ui2->dPresetData[8] = 0.000000;ui2->dPresetData[9] = 0.000000;ui2->dPresetData[10] = 0.000000;ui2->dPresetData[11] = 0.000000;ui2->dPresetData[12] = 0.000000;ui2->dPresetData[13] = 0.000000;ui2->dPresetData[14] = 0.000000;ui2->dPresetData[15] = 0.000000;
+	ui2->dPresetData[0] = -0.000000;ui2->dPresetData[1] = 0.000000;ui2->dPresetData[2] = 0.000000;ui2->dPresetData[3] = 0.000000;ui2->dPresetData[4] = 0.000000;ui2->dPresetData[5] = 0.000000;ui2->dPresetData[6] = 0.000000;ui2->dPresetData[7] = 0.000000;ui2->dPresetData[8] = 0.000000;ui2->dPresetData[9] = 0.000000;ui2->dPresetData[10] = 0.000000;ui2->dPresetData[11] = 0.000000;ui2->dPresetData[12] = 0.000000;ui2->dPresetData[13] = 0.000000;ui2->dPresetData[14] = 0.000000;ui2->dPresetData[15] = 0.000000;
 	ui2->cControlName = "LFO 1 Mode";
 	ui2->bOwnerControl = false;
 	ui2->bMIDIControl = false;
@@ -887,7 +700,7 @@ bool __stdcall CNanosynth::initUI()
 	ui3->cControlUnits = "Hz";
 	ui3->cVariableName = "m_dLFO1Rate";
 	ui3->cEnumeratedList = "SEL1,SEL2,SEL3";
-	ui3->dPresetData[0] = 0.000000;ui3->dPresetData[1] = 0.000000;ui3->dPresetData[2] = 0.000000;ui3->dPresetData[3] = 0.000000;ui3->dPresetData[4] = 0.000000;ui3->dPresetData[5] = 0.000000;ui3->dPresetData[6] = 0.000000;ui3->dPresetData[7] = 0.000000;ui3->dPresetData[8] = 0.000000;ui3->dPresetData[9] = 0.000000;ui3->dPresetData[10] = 0.000000;ui3->dPresetData[11] = 0.000000;ui3->dPresetData[12] = 0.000000;ui3->dPresetData[13] = 0.000000;ui3->dPresetData[14] = 0.000000;ui3->dPresetData[15] = 0.000000;
+	ui3->dPresetData[0] = 0.500000;ui3->dPresetData[1] = 0.000000;ui3->dPresetData[2] = 0.000000;ui3->dPresetData[3] = 0.000000;ui3->dPresetData[4] = 0.000000;ui3->dPresetData[5] = 0.000000;ui3->dPresetData[6] = 0.000000;ui3->dPresetData[7] = 0.000000;ui3->dPresetData[8] = 0.000000;ui3->dPresetData[9] = 0.000000;ui3->dPresetData[10] = 0.000000;ui3->dPresetData[11] = 0.000000;ui3->dPresetData[12] = 0.000000;ui3->dPresetData[13] = 0.000000;ui3->dPresetData[14] = 0.000000;ui3->dPresetData[15] = 0.000000;
 	ui3->cControlName = "LFO 1 Rate";
 	ui3->bOwnerControl = false;
 	ui3->bMIDIControl = false;
@@ -1228,7 +1041,7 @@ bool __stdcall CNanosynth::initUI()
 
 
 	// **--0xEDA5--**
-	// -------------------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------------- //
 
 	return true;
 
