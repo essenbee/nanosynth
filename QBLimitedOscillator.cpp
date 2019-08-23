@@ -133,10 +133,3 @@ inline double CQBLimitedOscillator::doTriangle(double dModulo, double dInc, doub
 	
 	return dOut;
 }
-
-inline double CQBLimitedOscillator::doOscillate(double* pQuadPhaseOutput = NULL)
-{
-	double dOut = 0.0;
-
-	return dOut;
-}

@@ -13,6 +13,8 @@
 // base class
 #include "plugin.h"
 #include "synthfunctions.h"
+#include "LFO.h"
+#include "QBLimitedOscillator.h"
 
 
 // un-comment for advanced GUI API: see www.willpirkle.com for details and sample code
@@ -110,6 +112,13 @@ public:
 	// Add your code here: ----------------------------------------------------------- //
 
 	UINT m_uMidiRxChannel;
+
+	CQBLimitedOscillator m_Osc1;
+	CQBLimitedOscillator m_Osc2;
+
+	CLFO m_LFO1;
+
+	void update();
 
 	// END OF USER CODE -------------------------------------------------------------- //
 

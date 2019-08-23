@@ -9,7 +9,7 @@
 #include "nanosynth.h"
 #include "trace.h"
 
-#define LOG_MIDI 1
+// #define LOG_MIDI 0
 
 
 /* constructor()
@@ -117,11 +117,34 @@ void __stdcall CNanosynth::processRackAFXMessage(UINT uMessage, PROCESS_INFO& pr
 bool __stdcall CNanosynth::prepareForPlay()
 {
 	// Add your code here:
+	m_Osc1.setSampleRate(m_nSampleRate);
+	m_Osc2.setSampleRate(m_nSampleRate);
+	m_LFO1.setSampleRate(m_nSampleRate);
 
+	m_Osc2.m_nCents = 2.5; // Detune oscillator 2 by 2.5 cents for sonic reasons
 
+	//Update from GUI
+	update();
 
+	return true;
 	// --- let base class do its thing
-	return CPlugIn::prepareForPlay();
+	//return CPlugIn::prepareForPlay();
+}
+
+// User-provided update() method to
+// update the C++ objects from the GUI controls
+void CNanosynth::update()
+{
+	m_Osc1.m_uWaveform = m_uOscWaveform;
+	m_Osc2.m_uWaveform = m_uOscWaveform;
+	m_Osc1.update();
+	m_Osc2.update();
+
+	m_LFO1.m_uWaveform = m_uLFO1Waveform;
+	m_LFO1.m_dAmplitude = m_dLFO1Amplitude;
+	m_LFO1.m_dOscFo = m_dLFO1Rate;
+	m_LFO1.m_uLFOMode = m_uLFO1Mode;
+	m_LFO1.update();
 }
 
 /* processAudioFrame
@@ -131,7 +154,7 @@ bool __stdcall CNanosynth::prepareForPlay()
 LEFT INPUT = pInputBuffer[0];
 RIGHT INPUT = pInputBuffer[1]
 
-LEFT OUTPUT = pInputBuffer[0]
+LEFT OUTPUT = pOutputBuffer[0]
 RIGHT OUTPUT = pOutputBuffer[1]
 
 HOST INFORMATION is available in m_HostProcessInfo:
@@ -148,26 +171,36 @@ m_HostProcessInfo.uTimeSigDenomintor = Host Time Signature Denominator (if suppo
 */
 bool __stdcall CNanosynth::processAudioFrame(float* pInputBuffer, float* pOutputBuffer, UINT uNumInputChannels, UINT uNumOutputChannels)
 {
-	// --- for VST3 plugins only
-	doVSTSampleAccurateParamUpdates();
+	double dOut = 0.0;
 
-	// --- smooth parameters (if enabled) DO NOT REMOVE
-	smoothParameterValues();
+	if (m_Osc1.m_bNoteOn)
+	{
+		// Get LFO Output
+		double dLFO1Out = m_LFO1.doOscillate();
 
-	// output = input -- change this for meaningful processing
-	//
-	// Do LEFT (MONO) Channel; there is always at least one input/one output
-	// (INSERT Effect)
-	pOutputBuffer[0] = pInputBuffer[0];
+		m_Osc1.setFoModExp(dLFO1Out * OSC_FO_MOD_RANGE);
+		m_Osc2.setFoModExp(dLFO1Out * OSC_FO_MOD_RANGE);
+
+		m_Osc1.update();
+		m_Osc2.update();
+
+		dOut = 0.5 * m_Osc1.doOscillate() + 0.5 * m_Osc2.doOscillate();
+	}
+
+	pOutputBuffer[0] = dOut;
 
 	// Mono-In, Stereo-Out (AUX Effect)
 	if (uNumInputChannels == 1 && uNumOutputChannels == 2)
-		pOutputBuffer[1] = pInputBuffer[0];
+	{
+		pOutputBuffer[1] = dOut;
+
+	}
 
 	// Stereo-In, Stereo-Out (INSERT Effect)
 	if (uNumInputChannels == 2 && uNumOutputChannels == 2)
-		pOutputBuffer[1] = pInputBuffer[1];
-
+	{
+		pOutputBuffer[1] = dOut;
+	}
 
 	return true;
 }
@@ -206,17 +239,7 @@ UIList Index	Variable Name					Control Index
 //
 bool __stdcall CNanosynth::userInterfaceChange(int nControlIndex)
 {
-	// decode the control index, or delete the switch and use brute force calls
-	switch (nControlIndex)
-	{
-	case 0:
-	{
-		break;
-	}
-
-	default:
-		break;
-	}
+	update();
 
 	return true;
 }
@@ -443,6 +466,15 @@ bool __stdcall CNanosynth::midiNoteOn(UINT uChannel, UINT uMIDINote, UINT uVeloc
 	TRACE("-- Note On Ch: %d Note: %d Vel: %d \n", uChannel, uMIDINote, uVelocity);
 #endif
 
+	m_Osc1.m_dOscFo = midiFreqTable[uMIDINote];
+	m_Osc2.m_dOscFo = midiFreqTable[uMIDINote];
+	m_Osc1.update();
+	m_Osc2.update();
+
+	m_Osc1.startOscillator();
+	m_Osc2.startOscillator();
+	m_LFO1.startOscillator();
+
 	return true;
 }
 
@@ -463,6 +495,11 @@ bool __stdcall CNanosynth::midiNoteOff(UINT uChannel, UINT uMIDINote, UINT uVelo
 		TRACE("-- Note Off Ch: %d Note: %d Vel: %d \n", uChannel, uMIDINote, uVelocity);
 	}
 #endif
+
+	m_Osc1.stopOscillator();
+	m_Osc2.stopOscillator();
+	m_LFO1.stopOscillator();
+
 	return true;
 }
 
