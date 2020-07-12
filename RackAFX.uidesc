@@ -1,13 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <vstgui-ui-description version="1">
 	<fonts>
 		<font bold="true" font-name="Microsoft Sans Serif" name="Microsoft Sans Serif" size="18" />
 	</fonts>
-	<colors />
-	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="960, 645" minSize="960, 645" mouse-enabled="true" name="Editor" origin="0, 0" size="960, 645" transparent="false">
-	</template>
+	<colors>
+		<color name="kLightGreyCColor" rgba="#c8c8c8ff" />
+		<color name="kDarkGreyCColor" rgba="#646464ff" />
+	</colors>
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="960, 645" minSize="960, 645" mouse-enabled="true" name="Editor" origin="0, 0" size="960, 645" transparent="false" />
 	<custom>
-		<attributes RAFXPath="C:\RackAFX.uidesc" name="VST3Editor" />
+		<attributes RAFXPath="D:\dev\RackAFX6Projects\nanosynth\RackAFX.uidesc" name="VST3Editor" />
 		<attributes name="FocusDrawing" />
 		<attributes KnobAction="2" />
 		<attributes name="UIGridController" />
@@ -16,6 +18,10 @@
 		<attributes EditorSize="0, 0, 1236, 768" SplitViewSize_0_0="0.693135935397038990000" SplitViewSize_0_1="0.293405114401076690000" SplitViewSize_1_0="0.479138627187079390000" SplitViewSize_1_1="0.50740242261103630000" SplitViewSize_2_0="0.63187702265372170000" SplitViewSize_2_1="0.360032362459546950000" TabSwitchValue="1" name="UIEditController" />
 		<attributes SelectedRow="-1" name="UIViewCreatorDataSource" />
 		<attributes SelectedRow="-1" name="UITagsDataSource" />
+		<attributes AppendUnits="true" />
+		<attributes TransparentEdits="true" />
+		<attributes default-blurb-color="~ BlackCColor" />
+		<attributes RAFXShowGrid="false" />
 	</custom>
 	<bitmaps>
 		<bitmap name="darkgreyvinyl" nineparttiled-offsets="0, 0, 0, 0" path="darkgreyvinyl.png" rafxtype="backgnd" />
@@ -152,5 +158,65 @@
 		<bitmap name="horizswitchsynth" path="horizswitchsynth.png" rafxtype="horizswitch" />
 	</bitmaps>
 	<control-tags>
+		<control-tag name="Osc Waveform" tag="0" />
+		<control-tag name="LFO 1 Waveform" tag="1" />
+		<control-tag name="LFO 1 Mode" tag="2" />
+		<control-tag name="LFO 1 Rate" tag="3" />
+		<control-tag name="LFO 1 Depth" tag="4" />
+		<control-tag name="ASSIGNBUTTON_1" tag="32768" />
+		<control-tag name="ASSIGNBUTTON_2" tag="32769" />
+		<control-tag name="ASSIGNBUTTON_3" tag="32770" />
+		<control-tag name="JOYSTICK_X" tag="32773" />
+		<control-tag name="JOYSTICK_Y" tag="32774" />
+		<control-tag name="JOYSTICK" tag="32775" />
+		<control-tag name="TRACKPAD" tag="32776" />
+		<control-tag name="TAB_CTRL_0" tag="65536" />
+		<control-tag name="TAB_CTRL_1" tag="65537" />
+		<control-tag name="TAB_CTRL_2" tag="65538" />
+		<control-tag name="TAB_CTRL_3" tag="65539" />
+		<control-tag name="TAB_CTRL_4" tag="65540" />
+		<control-tag name="TAB_CTRL_5" tag="65541" />
+		<control-tag name="TAB_CTRL_6" tag="65542" />
+		<control-tag name="TAB_CTRL_7" tag="65543" />
+		<control-tag name="TAB_CTRL_8" tag="65544" />
+		<control-tag name="TAB_CTRL_9" tag="65545" />
+		<control-tag name="TAB_CTRL_10" tag="65546" />
+		<control-tag name="TAB_CTRL_11" tag="65547" />
+		<control-tag name="TAB_CTRL_12" tag="65548" />
+		<control-tag name="TAB_CTRL_13" tag="65549" />
+		<control-tag name="TAB_CTRL_14" tag="65550" />
+		<control-tag name="TAB_CTRL_15" tag="65551" />
+		<control-tag name="TAB_CTRL_16" tag="65552" />
+		<control-tag name="TAB_CTRL_17" tag="65553" />
+		<control-tag name="TAB_CTRL_18" tag="65554" />
+		<control-tag name="TAB_CTRL_19" tag="65555" />
+		<control-tag name="TAB_CTRL_20" tag="65556" />
+		<control-tag name="TAB_CTRL_21" tag="65557" />
+		<control-tag name="TAB_CTRL_22" tag="65558" />
+		<control-tag name="TAB_CTRL_23" tag="65559" />
+		<control-tag name="TAB_CTRL_24" tag="65560" />
+		<control-tag name="TAB_CTRL_25" tag="65561" />
+		<control-tag name="TAB_CTRL_26" tag="65562" />
+		<control-tag name="TAB_CTRL_27" tag="65563" />
+		<control-tag name="TAB_CTRL_28" tag="65564" />
+		<control-tag name="TAB_CTRL_29" tag="65565" />
+		<control-tag name="TAB_CTRL_30" tag="65566" />
+		<control-tag name="TAB_CTRL_31" tag="65567" />
 	</control-tags>
+	<gradients>
+		<gradient name="kLightGreyCColor">
+			<color-stop rgba="#c8c8c8ff" start="0" />
+			<color-stop rgba="#c8c8c8ff" start="1" />
+		</gradient>
+		<gradient name="kDarkGreyCColor">
+			<color-stop rgba="#646464ff" start="0" />
+			<color-stop rgba="#646464ff" start="1" />
+		</gradient>
+	</gradients>
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="1024, 791" minSize="1024, 791" mouse-enabled="true" name="Off Screen View 1" origin="0, 0" size="1024, 791" transparent="false" />
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="1024, 791" minSize="1024, 791" mouse-enabled="true" name="Off Screen View 2" origin="0, 0" size="1024, 791" transparent="false" />
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="1024, 791" minSize="1024, 791" mouse-enabled="true" name="Off Screen View 3" origin="0, 0" size="1024, 791" transparent="false" />
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="1024, 791" minSize="1024, 791" mouse-enabled="true" name="Off Screen View 4" origin="0, 0" size="1024, 791" transparent="false" />
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="1024, 791" minSize="1024, 791" mouse-enabled="true" name="Off Screen View 5" origin="0, 0" size="1024, 791" transparent="false" />
+	<template background-color="~ GreyCColor" background-color-draw-style="filled and stroked" bitmap="" class="CViewContainer" maxSize="1024, 791" minSize="1024, 791" mouse-enabled="true" name="Off Screen View 6" origin="0, 0" size="1024, 791" transparent="false" />
 </vstgui-ui-description>
