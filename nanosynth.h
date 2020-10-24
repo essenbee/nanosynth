@@ -17,6 +17,9 @@
 // --- synth objects
 #include "QBLimitedOscillator.h"
 #include "LFO.h"
+#include "WTOscillator.h"
+#include "EnvelopeGenerator.h"
+#include "DCA.h"
 
 // abstract base class for RackAFX filters
 class CNanoSynth : public CPlugIn
@@ -89,9 +92,26 @@ public:
 
 	// Add your code here: ----------------------------------------------------------- //
 
+	// Select Oscillator Type Here
+	// ===========================
+
+	// Quasi-bandlimted oscillators
 	CQBLimitedOscillator m_Osc1;
 	CQBLimitedOscillator m_Osc2;
+
+	// Wavetable oscillators
+	//CWTOscillator m_Osc1;
+	//CWTOscillator m_Osc2;
+
+	// Low Frequency Oscillator
 	CLFO m_LFO1;
+
+	// Envelope Generator 1
+	CEnvelopeGenerator m_EG1;
+
+	// Digitally Controlled Amplifier
+	CDCA m_DCA;
+
 	void update();
 	UINT m_uMidiRxChannel;
 	// END OF USER CODE -------------------------------------------------------------- //
@@ -104,10 +124,21 @@ public:
 	enum{SINE,SAW1,SAW2,SAW3,TRI,SQUARE,NOISE,PNOISE};
 	UINT m_uLFO1Waveform;
 	enum{sine,usaw,dsaw,square,expo,rsh,qrsh};
+	double m_dAttackTime_mSec;
+	double m_dPanControl;
+	double m_dVolume_dB;
+	UINT m_uLegatoMode;
+	enum{mono,legato};
 	UINT m_uLFO1Mode;
 	enum{sync,shot,free};
+	double m_dDecayTime_mSec;
+	double m_dEG1DCAIntensity;
+	UINT m_uResetToZero;
+	enum{OFF,ON};
 	double m_dLFO1Rate;
+	double m_dSustainLevel;
 	double m_dLFO1Amplitude;
+	double m_dReleaseTime_mSec;
 
 	// **--0x1A7F--**
 	// ------------------------------------------------------------------------------- //

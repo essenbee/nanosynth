@@ -335,6 +335,12 @@
 				RelativePath="plugin.cpp"
 				>
 			</File>
+				<File RelativePath="EnvelopeGenerator.cpp"></File>
+
+				<File RelativePath="DCA.cpp"></File>
+
+				<File RelativePath="WTOscillator.cpp"></File>
+
 				<File RelativePath="QBLimitedOscillator.cpp"></File>
 
 				<File RelativePath="LFO.cpp"></File>
@@ -362,6 +368,12 @@
 				RelativePath="plugin.h"
 				>
 			</File>
+				<File RelativePath="EnvelopeGenerator.h"></File>
+
+				<File RelativePath="DCA.h"></File>
+
+				<File RelativePath="WTOscillator.h"></File>
+
 				<File RelativePath="QBLimitedOscillator.h"></File>
 
 				<File RelativePath="LFO.h"></File>
@@ -395,6 +407,26 @@
 	<Globals>
 	</Globals>
 </VisualStudioProject>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

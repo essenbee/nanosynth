@@ -166,6 +166,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DCA.cpp" />
+    <ClCompile Include="EnvelopeGenerator.cpp" />
     <ClCompile Include="LFO.cpp" />
     <ClCompile Include="Oscillator.cpp" />
     <ClCompile Include="plugin.cpp" />
@@ -173,8 +175,11 @@
     <ClCompile Include="QBLimitedOscillator.cpp" />
     <ClCompile Include="RackAFXDLL.cpp" />
     <ClCompile Include="nanosynth.cpp" />
+    <ClCompile Include="WTOscillator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DCA.h" />
+    <ClInclude Include="EnvelopeGenerator.h" />
     <ClInclude Include="LFO.h" />
     <ClInclude Include="lookuptables.h" />
     <ClInclude Include="Oscillator.h" />
@@ -186,6 +191,7 @@
     <ClInclude Include="synthfunctions.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
+    <ClInclude Include="WTOscillator.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\knobvst.png" />
@@ -200,82 +206,6 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
