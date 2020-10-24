@@ -20,6 +20,7 @@
 #include "WTOscillator.h"
 #include "EnvelopeGenerator.h"
 #include "DCA.h"
+#include "MoogLadderFilter.h"
 
 // abstract base class for RackAFX filters
 class CNanoSynth : public CPlugIn
@@ -112,6 +113,11 @@ public:
 	// Digitally Controlled Amplifier
 	CDCA m_DCA;
 
+	// Select Filter Here
+	// ==================
+
+	CMoogLadderFilter m_Filter1;
+
 	void update();
 	UINT m_uMidiRxChannel;
 	// END OF USER CODE -------------------------------------------------------------- //
@@ -129,16 +135,21 @@ public:
 	double m_dVolume_dB;
 	UINT m_uLegatoMode;
 	enum{mono,legato};
+	double m_dFcControl;
 	UINT m_uLFO1Mode;
 	enum{sync,shot,free};
 	double m_dDecayTime_mSec;
 	double m_dEG1DCAIntensity;
 	UINT m_uResetToZero;
 	enum{OFF,ON};
+	double m_dQControl;
 	double m_dLFO1Rate;
 	double m_dSustainLevel;
+	double m_dFilterKeyTrackIntensity;
 	double m_dLFO1Amplitude;
 	double m_dReleaseTime_mSec;
+	double m_dEG1OscIntensity;
+	UINT m_uFilterKeyTrack;
 
 	// **--0x1A7F--**
 	// ------------------------------------------------------------------------------- //

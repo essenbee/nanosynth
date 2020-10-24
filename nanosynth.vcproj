@@ -335,6 +335,16 @@
 				RelativePath="plugin.cpp"
 				>
 			</File>
+				<File RelativePath="VAOnePoleFilter.cpp"></File>
+
+				<File RelativePath="SEMFilter.cpp"></File>
+
+				<File RelativePath="MoogLadderFilter.cpp"></File>
+
+				<File RelativePath="KThreeFiveFilter.cpp"></File>
+
+				<File RelativePath="DiodeLadderFilter.cpp"></File>
+
 				<File RelativePath="EnvelopeGenerator.cpp"></File>
 
 				<File RelativePath="DCA.cpp"></File>
@@ -368,6 +378,16 @@
 				RelativePath="plugin.h"
 				>
 			</File>
+				<File RelativePath="VAOnePoleFilter.h"></File>
+
+				<File RelativePath="SEMFilter.h"></File>
+
+				<File RelativePath="MoogLadderFilter.h"></File>
+
+				<File RelativePath="KThreeFiveFilter.h"></File>
+
+				<File RelativePath="DiodeLadderFilter.h"></File>
+
 				<File RelativePath="EnvelopeGenerator.h"></File>
 
 				<File RelativePath="DCA.h"></File>
@@ -407,6 +427,10 @@
 	<Globals>
 	</Globals>
 </VisualStudioProject>
+
+
+
+
 
 
 

@@ -167,30 +167,42 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DCA.cpp" />
+    <ClCompile Include="DiodeLadderFilter.cpp" />
     <ClCompile Include="EnvelopeGenerator.cpp" />
+    <ClCompile Include="Filter.cpp" />
+    <ClCompile Include="KThreeFiveFilter.cpp" />
     <ClCompile Include="LFO.cpp" />
+    <ClCompile Include="MoogLadderFilter.cpp" />
     <ClCompile Include="Oscillator.cpp" />
     <ClCompile Include="plugin.cpp" />
     <ClCompile Include="pluginobjects.cpp" />
     <ClCompile Include="QBLimitedOscillator.cpp" />
     <ClCompile Include="RackAFXDLL.cpp" />
     <ClCompile Include="nanosynth.cpp" />
+    <ClCompile Include="SEMFilter.cpp" />
+    <ClCompile Include="VAOnePoleFilter.cpp" />
     <ClCompile Include="WTOscillator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DCA.h" />
+    <ClInclude Include="DiodeLadderFilter.h" />
     <ClInclude Include="EnvelopeGenerator.h" />
+    <ClInclude Include="Filter.h" />
+    <ClInclude Include="KThreeFiveFilter.h" />
     <ClInclude Include="LFO.h" />
     <ClInclude Include="lookuptables.h" />
+    <ClInclude Include="MoogLadderFilter.h" />
     <ClInclude Include="Oscillator.h" />
     <ClInclude Include="plugin.h" />
     <ClInclude Include="pluginconstants.h" />
     <ClInclude Include="QBLimitedOscillator.h" />
     <ClInclude Include="RackAFXDLL.h" />
     <ClInclude Include="nanosynth.h" />
+    <ClInclude Include="SEMFilter.h" />
     <ClInclude Include="synthfunctions.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
+    <ClInclude Include="VAOnePoleFilter.h" />
     <ClInclude Include="WTOscillator.h" />
   </ItemGroup>
   <ItemGroup>
@@ -206,30 +218,6 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
