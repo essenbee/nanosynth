@@ -100,8 +100,8 @@ public:
 	CQBLimitedOscillator m_Osc2;
 
 	// Wavetable oscillators
-	//CWTOscillator m_Osc1;
-	//CWTOscillator m_Osc2;
+	// CWTOscillator m_Osc1;
+	// CWTOscillator m_Osc2;
 
 	// Low Frequency Oscillator
 	CLFO m_LFO1;

@@ -63,18 +63,19 @@ void CWTOscillator::update()
 
 void CWTOscillator::setSampleRate(double dFs)
 {
-	bool bNewSR = m_dSampleRate != dFs ? true : false;
-	
-	// --- base class first
-	COscillator::setSampleRate(dFs);
+	// Test for change
+	bool bNewSR = m_dSampleRate != dFs ? true : false; // Base class first
+	COscillator::setSampleRate(dFs); // Recreate the tables only if sample rate has changed
 
-	// --- recrate the tables only if sample rate has changed
-	if(bNewSR)
+	if (bNewSR)
 	{
-		// --- then recrate
+		// --- then recreate
 		destroyWaveTables();
-		createWaveTables();
-	}
+		createWaveTables();   
+		return;
+	}   
+	
+	createWaveTables();
 }
 
 
